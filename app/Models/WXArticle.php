@@ -7,17 +7,13 @@
  */
 
 namespace App\Models;
-use DB;
 
 class WXArticle extends CommonModel{
 
     protected $table="wx_article";
-    protected $fillable = ['title','time','startNum','readNum'];
+    protected $fillable = ['title','time','startNum','readNum','belong'];
 
-    /**
-     * 批量导入
-     * @param $array
-     */
+
 
 
 }

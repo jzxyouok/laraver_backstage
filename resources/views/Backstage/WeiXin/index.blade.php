@@ -7,13 +7,15 @@
             <a>系统</a> /
             <a>微信</a> /
             <a>文章列表</a>
-            <a href="/weixin/addArticle">添加</a>
+            <a href="/weixin/list">添加公众号</a>
+             <a href="/weixin/addArticle">添加</a>
         </span>
     </div>
     <table>
         <thead>
         <tr>
             <th colspan="2" style="width:5%">操作</th>
+            <th>公众号</th>
             <th>标题</th>
             <th>阅读量</th>
             <th>点赞数</th>
@@ -25,6 +27,7 @@
             <tr>
                 <td><i class="fa fa-trash"  data-id="{{$vo->id}}"></i></td>
                 <td><i class="fa fa-pencil"></i></td>
+                <td>{{$vo->belong}}</td>
                 <td>{!!$vo->title!!}</td>
                 <td>{{$vo->readNum}}</td>
                 <td>{{$vo->startNum}}</td>

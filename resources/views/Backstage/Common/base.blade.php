@@ -30,7 +30,7 @@
     </ul>
 </nav>
 
-<div id="mainBody" class="theme-black-bg ">
+<div id="mainBody" class="theme-black-bg " style="margin-left: 4vw;width:96vw;">
     <div class="height-60 base-bg">
         <span class="col-2 padding-10 verti-padding-0">Jandou</span>
         <ul class="nav right-box">

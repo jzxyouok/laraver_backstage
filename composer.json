@@ -6,7 +6,9 @@
     "type": "project",
     "require": {
         "php": ">=5.5.9",
-        "laravel/framework": "5.2.*"
+        "guzzlehttp/guzzle": "~5.3|~6.0",
+        "laravel/framework": "5.2.*",
+        "laravelcollective/html": "5.2.*"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
@@ -46,5 +48,7 @@
     },
     "config": {
         "preferred-install": "dist"
-    }
+    },
+
+    "repositories": {"packagist": { "type": "composer", "url": "https://packagist.phpcomposer.com"}}
 }

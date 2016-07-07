@@ -11,19 +11,40 @@
 |
 */
 
+
+/**
+ * 前台入口
+ */
 Route::get('/', function () {
     return view('welcome');
 });
 
+
+/**
+ * 后台入口
+ */
 Route::group(['prefix' => '/admin', 'namespace' => 'Backstage','middleware' => 'web'],function(){
 
     Route::get('/','IndexController@index');
 });
 
+
+/**
+ * 微信部分
+ */
 Route::group(['prefix' => '/weixin', 'namespace' => 'Backstage','middleware' => 'web'],function(){
 
     Route::get('/','WeiXinController@index');
     Route::get('/addArticle','WeiXinController@updateWX');
+    Route::get('/list','WeiXinController@wxList');
     Route::post('/delete','WeiXinController@deleteById');
+});
 
+
+/**
+ * 定时运行
+ */
+Route::group(['prefix' => '/timing','namespace' => 'Backstage','middleware' => 'web'],function(){
+
+   Route::get('/sendEmails','IndexController@sendEmails');
 });

@@ -8,8 +8,8 @@
 
 namespace App\Http\Services;
 use App\Models\WXArticle;
-
-
+use App\Models\WXList;
+use Mail;
 class WXArticleService  {
 
 
@@ -18,19 +18,11 @@ class WXArticleService  {
      * @return  boolean
      */
     public function saveTodayWXArticle(){
-        $urlArray[0] = "http://top.aiweibang.com/u/36297";  // test
-        $urlArray[1] = "http://top.aiweibang.com/u/275614";  //test
+        $urlArray = WXList::where('status' ,'=','1')->select('name', 'url','id')->get();
         $model = new WXArticle();
-        $last_time = $model::orderBy('id','desc')->take(1)->get();
-        $last_time = $last_time[0]->time;
-        $now = date("Y-m-d 00:00:00");
-        $oneDay = 24*60*60;
-        if((strtotime($now) - strtotime($last_time)) > $oneDay)
-        {
-            $info = $this->getTodayNewWXArticle($urlArray);
-            $wxArticle = new WXArticle();
-            return $wxArticle->insert($info,'wx_article');
-        }
+        $this->getTodayNewWXArticle($urlArray);
+        return true;
+
         return false;
     }
 
@@ -40,9 +32,21 @@ class WXArticleService  {
      */
     public function getTodayNewWXArticle($urlArray){
 
-        $count = 0;
         for ($z = 0; $z < count($urlArray); ++$z) {
-            $url = $urlArray[$z];
+            $wxArticle = new WXArticle();
+            $count = 0;
+            $info = array();
+            $url = $urlArray[$z]->url;
+            $wx_id = $urlArray[$z]->id;
+            $check = $wxArticle::where('wx_id','=',$wx_id)->orderBy('time','desc')->take(1)->select('time')->get();
+            if(empty($check))
+            {
+                $last_update_time = date("Y-m-d", strtotime("-1 day"));
+            }
+            else{
+                $last_update_time = $wxArticle::where('wx_id','=',$wx_id)->orderBy('time','desc')->take(1)->select('time')->get();
+                $last_update_time = $last_update_time[0]->time;
+            }
             if ($url != NULL) {
                 $ch = curl_init();
                 curl_setopt($ch, CURLOPT_URL, $url);
@@ -59,23 +63,63 @@ class WXArticleService  {
                 preg_match_all($countRead, $str, $countRead);
                 preg_match_all($countGood, $str, $countGood);
                 $countRead[1] = array_slice($countRead[1], 0, 16);
-
                 for ($i = 0; $i < count($time[1]); ++$i) {
                     if ($time[1][$i] == "")
                         $time[1][$i] = $time[1][$i - 1];
-                    if (date("Y-m-d", strtotime("-1 day")) == $time[1][$i])  //获取昨天的数据
+                    if (strtotime($time[1][$i]) - strtotime($last_update_time) > 0)  //获取昨天的数据
                     {
+                        if ($count > 15) break;
                         $info[$count++] = array(
                             'title' => $title[0][$i],
                             'time' => $time[1][$i],
                             'readNum' => $countRead[1][$i],
                             'startNum' => $countGood[1][$i],
+                            'belong' => $urlArray[$z]->name,
+                            'wx_id' => $wx_id,
                         );
                     }
                 }
-                if ($info == NULL) continue;
+                if (!empty($info)) {
+                    $wxArticle->insert($info, 'wx_article');
+                    unset($info);
+                }
+                else {
+                    unset($info);
+                }
             }
         }
-        return $info;
+        return true;
+    }
+
+
+    /**
+     * 编辑好发送邮件
+     */
+    function editEmail(){
+        $info = $this->getTodayArticle();
+        $data=['info'=>$info];
+        $flag = Mail::send('Backstage.Index.email',$data ,function($message){
+
+            $message->from("13750059992@163.com");
+            $array = array(
+                0   => '809781809@qq.com',
+                1 => '757410523@qq.com',
+
+            );
+            $message->to($array)->subject('来之Jandou的微信统计');
+        });
+       return $flag;
+    }
+
+
+    /**
+     * 提取当天抓取的文章
+     */
+
+    public function getTodayArticle(){
+        $today = date("Y-m-d",strtotime('-1day'));
+        $todayArticles = WXArticle::where('created_at','>',$today)->select('title', 'belong','readNum')->get();
+    
+        return $todayArticles;
     }
 }

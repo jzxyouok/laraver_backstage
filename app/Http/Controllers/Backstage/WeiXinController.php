@@ -9,8 +9,10 @@
 namespace App\Http\Controllers\Backstage;
 use App\Http\Services\WXArticleService;
 use App\Models\WXArticle;
+use App\Models\WXList;
 use Illuminate\Support\Facades\Input;
 use Redirect;
+use Mail;
 class WeiXinController extends CommonController
 {
 
@@ -39,5 +41,9 @@ class WeiXinController extends CommonController
             'msg' => 'ok',
         ));
 
+    }
+    function wxList(){
+        $list = WXList::orderBy('id','desc')->paginate(10);
+        return view('Backstage.WeiXin.list')->with('info',$list);
     }
 }
